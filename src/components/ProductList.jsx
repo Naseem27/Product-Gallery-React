@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -9,9 +8,10 @@ const ProductList = () => {
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
-
+  const location = useLocation();
 
   const limit = 5;
+  const restored = useRef(false);
 
   const fetchProducts = async (skipValue = 0, searchTerm = "") => {
     setLoading(true);
@@ -26,13 +26,25 @@ const ProductList = () => {
       setProducts(data.products || []);
       setTotal(data.total || 30);
     } catch (error) {
-      console.error("Failed to load Products :", error);
+      console.error("Failed to load Products:", error);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchProducts(skip, search);
+    if (!restored.current && location.state?.products) {
+      const { products, skip, search, total } = location.state;
+      setProducts(products);
+      setSkip(skip);
+      setSearch(search);
+      setTotal(total);
+      setLoading(false);
+      restored.current = true;
+
+      window.history.replaceState({}, document.title);
+    } else {
+      fetchProducts(skip, search);
+    }
   }, [skip]);
 
   const handleSearch = () => {
@@ -93,10 +105,21 @@ const ProductList = () => {
                     <p className="description">{product.description}</p>
                     <div className="rate">
                       <div className="price">${product.price}</div>
-                      <div className="per">({product.discountPercentage}% off)</div>
+                      <div className="per">
+                        ({product.discountPercentage}% off)
+                      </div>
                     </div>
                     <div className="rating">⭐ {product.rating}</div>
-                    <button className="viewbtn" onClick={() => navigate(`/product/${product.id}`)}>View Details</button>
+                    <button
+                      className="viewbtn"
+                      onClick={() =>
+                        navigate(`/product/${product.id}`, {
+                          state: { products, skip, search, total },
+                        })
+                      }
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>

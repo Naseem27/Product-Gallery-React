@@ -231,6 +231,11 @@ body {
   
 }
 
+figure:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
 .reviews {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -259,6 +264,18 @@ body {
   margin: 6px 0;
 }
 
+.rating-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rating-inline .rating-value {
+  font-size: 0.9rem;
+  color: #444;
+  margin-left: 6px;
+}
 
 strong {
   text-align: left;
